@@ -29,21 +29,16 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  const {
-    owner = req.user._id,
-  } = req.body;
-  Card.findById(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (card.owner === owner) {
-        Card.findByIdAndRemove(req.params.cardId);
+      if (card) {
+        return res.status(200).send({ message: 'Карточка удалена' });
       }
-    })
-    .then(() => {
-      res.status(200).send({ message: 'Карточка удалена' });
+      return res.status(404).send({ message: 'Карточка не найдена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Карточка не найдена' });
+        return res.status(400).send({ message: 'Карточка не найдена' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
     });
@@ -62,9 +57,6 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        // if (err.path === '_id') {
-        //   return res.status(404).send({ message: 'Карточка не найдена' });
-        // }
         return res.status(400).send({ message: 'Переданы некорректные данные' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
@@ -84,9 +76,6 @@ module.exports.dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        // if (err.path === '_id') {
-        //   return res.status(404).send({ message: 'Карточка не найдена' });
-        // }
         return res.status(400).send({ message: 'Переданы некорректные данные' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
