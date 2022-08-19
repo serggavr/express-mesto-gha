@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 // const router = require('./routes/users');
 // const { createUser } = require('./controllers/users');
 
-
 const {
   PORT = 3000,
 } = process.env;
