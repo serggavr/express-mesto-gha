@@ -55,7 +55,10 @@ module.exports.likeCard = (req, res) => {
   } = req.body;
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
     .then((card) => {
-      res.status(200).send(card);
+      if (card) {
+        return res.status(200).send(card);
+      }
+      return res.status(404).send({ message: 'Карточка не найдена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -74,7 +77,10 @@ module.exports.dislikeCard = (req, res) => {
   } = req.body;
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
     .then((card) => {
-      res.status(200).send(card);
+      if (card) {
+        return res.status(200).send(card);
+      }
+      return res.status(404).send({ message: 'Карточка не найдена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
