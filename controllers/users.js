@@ -35,7 +35,10 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUser = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
-      res.status(200).send(user);
+      if (user) {
+        return res.status(200).send(user);
+      }
+      return res.status(404).send({ message: 'Пользователь не найден' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
