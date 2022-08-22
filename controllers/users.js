@@ -1,6 +1,12 @@
 const User = require('../models/user');
+const {
+  ValidationError,
+  ServerError,
+  NotFoundError,
+  CastError,
+} = require('../constants/errors');
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -12,84 +18,98 @@ module.exports.createUser = (req, res) => {
     avatar,
   })
     .then((user) => {
-      res.status(200).send(user);
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return next(new ServerError(err.message));
     });
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(200).send(users);
+      res.send(users);
     })
-    .catch(() => res.status(500).send({
-      message: 'Произошла ошибка',
-    }));
+    .catch((err) => next(new ServerError(err.message)));
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (user) {
-        return res.status(200).send(user);
+        return res.send(user);
       }
-      return res.status(404).send({ message: 'Пользователь не найден' });
+      return next(new NotFoundError(`Пользователь по указанному c id: ${req.params.cardId} не найден`));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Пользователь не найден' });
+        return next(new CastError('Передан некорректный id пользователя'));
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return next(new ServerError(err.message));
     });
 };
 
-module.exports.editUser = (req, res) => {
+module.exports.editUser = (req, res, next) => {
   const {
     name,
     about,
     owner = req.user._id,
   } = req.body;
-  User.findByIdAndUpdate(owner, {
-    name,
-    about,
-  }, { new: true, runValidators: true })
-    .then((user) => {
-      res.status(200).send(user);
+  User.findById(owner)
+    .then((userFound) => {
+      if (!userFound) {
+        return next(new NotFoundError(`Пользователь c id: ${owner} не найден`));
+      }
+      return User.findByIdAndUpdate(owner, {
+        name,
+        about,
+      }, { new: true, runValidators: true })
+        .then((user) => {
+          res.send(user);
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
+          }
+        });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        return next(new CastError('Передан некорректный id при обновлении профиля'));
       }
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return next(new ServerError(err.message));
     });
 };
 
-module.exports.editUserAvatar = (req, res) => {
+module.exports.editUserAvatar = (req, res, next) => {
   const {
     avatar,
     owner = req.user._id,
   } = req.body;
-  User.findByIdAndUpdate(owner, {
-    avatar,
-  }, { new: true, runValidators: true })
-    .then((user) => {
-      res.status(200).send(user);
+  User.findById(owner)
+    .then((userFound) => {
+      if (!userFound) {
+        return next(new NotFoundError(`Пользователь c id: ${owner} не найден`));
+      }
+      return User.findByIdAndUpdate(owner, {
+        avatar,
+      }, { new: true, runValidators: true })
+        .then((user) => {
+          res.send(user);
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
+          }
+        });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        return next(new CastError('Передан некорректный id при обновлении аватара'));
       }
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара' });
-      }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return next(new ServerError(err.message));
     });
 };
