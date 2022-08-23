@@ -20,7 +20,7 @@ module.exports.createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         return next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('card validation failed:', '').replace(':', '')}`));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
 
@@ -29,7 +29,7 @@ module.exports.getCards = (req, res, next) => {
     .then((cards) => {
       res.send(cards);
     })
-    .catch((err) => next(new ServerError(err.message)));
+    .catch(() => next(new ServerError('Произошла ошибка')));
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -44,7 +44,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError('Переданы некорректные данные при создании карточки'));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
 
@@ -63,7 +63,7 @@ module.exports.likeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError(' Переданы некорректные данные для постановки лайка'));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
 
@@ -82,6 +82,6 @@ module.exports.dislikeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError(' Переданы некорректные данные для cнятия лайка'));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };

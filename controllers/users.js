@@ -24,7 +24,7 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
 
@@ -33,7 +33,7 @@ module.exports.getUsers = (req, res, next) => {
     .then((users) => {
       res.send(users);
     })
-    .catch((err) => next(new ServerError(err.message)));
+    .catch(() => next(new ServerError('Произошла ошибка')));
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -48,7 +48,7 @@ module.exports.getUser = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError('Передан некорректный id пользователя'));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
 
@@ -80,7 +80,7 @@ module.exports.editUser = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError('Передан некорректный id при обновлении профиля'));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
 
@@ -110,6 +110,6 @@ module.exports.editUserAvatar = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError('Передан некорректный id при обновлении аватара'));
       }
-      return next(new ServerError(err.message));
+      return next(new ServerError('Произошла ошибка'));
     });
 };
