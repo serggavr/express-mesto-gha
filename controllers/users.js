@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
 const {
   ValidationError,
   ServerError,
@@ -11,22 +14,72 @@ module.exports.createUser = (req, res, next) => {
     name,
     about,
     avatar,
+    password,
+    email,
   } = req.body;
-  User.create({
-    name,
-    about,
-    avatar,
-  })
-    .then((user) => {
-      res.send(user);
+
+  bcrypt.hash(password, 10)
+    .then((hashedPassword) => {
+      User.create({
+        name,
+        about,
+        avatar,
+        password: hashedPassword,
+        email,
+      })
+        .then((user) => {
+          res.send(user);
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
+          }
+          return next(new ServerError('Произошла ошибка'));
+        });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
-      }
-      return next(new ServerError('Произошла ошибка'));
-    });
+    .catch((err) => next(new ServerError('Произошла ошибка')));
 };
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .orFail(() => next(new ValidationError('Не правильный email или пароль')))
+    .select('+password')
+    .then((user) => {
+      bcrypt.compare(password, user.password)
+        .then((isUserValid) => {
+          if (isUserValid) {
+            const token = jwt.sign({
+              _id: user._id,
+            }, 'SECRET');
+
+            res.cookie('jwt', token, {
+              maxAge: 604800000,
+              httpOnly: true,
+              sameSite: true,
+            })
+
+            res.send({ data: user.toJSON() });
+          } else {
+            next(new ValidationError('Не правильный email или пароль'));
+          }
+        })
+    })
+    .catch(() => next(new ServerError('Произошла ошибка')));
+};
+
+// module.exports.createUser = (req, res, next) => {
+//   User.create(req.body)
+//     .then((user) => {
+//       res.send({ data: user });
+//     })
+//     .catch((err) => {
+//       if (err.name === 'ValidationError') {
+//         return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
+//       }
+//       return next(new ServerError('Произошла ошибка'));
+//     });
+// };
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
