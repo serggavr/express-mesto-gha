@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -8,7 +9,6 @@ const {
   NotFoundError,
   CastError,
   ConflictError,
-  UnauthorizedError,
 } = require('../constants/errors');
 
 module.exports.createUser = (req, res, next) => {
@@ -37,7 +37,7 @@ module.exports.createUser = (req, res, next) => {
             return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
           }
           if (err.code === 11000) {
-            next(new ConflictError(`Пользователь с email '${err.keyValue.email}' уже зарегистрирован`));
+            return next(new ConflictError(`Пользователь с email '${err.keyValue.email}' уже зарегистрирован`));
           }
           return next(new ServerError('Произошла ошибка'));
         });
@@ -64,7 +64,7 @@ module.exports.login = (req, res, next) => {
       res.send({ data: user.toJSON() });
     })
     .catch(() => {
-      next(new UnauthorizedError('Неправильные почта или пароль'));
+      next(new ValidationError('Неправильные почта или пароль'));
     });
 };
 
@@ -128,7 +128,7 @@ module.exports.editUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
+            return next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
           }
         });
     })
@@ -158,7 +158,7 @@ module.exports.editUserAvatar = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
+            return next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
           }
         });
     })

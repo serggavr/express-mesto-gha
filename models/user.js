@@ -8,21 +8,21 @@ const { UnauthorizedError, ServerError } = require('../constants/errors');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'обязательно для заполнения'],
+    // required: [true, 'обязательно для заполнения'],
     minlength: [2, 'должно содержать минимум 2 символа'],
     maxlength: [30, 'должно содержать максимум 30 символов'],
     default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
-    required: [true, 'обязательно для заполнения'],
+    // required: [true, 'обязательно для заполнения'],
     minlength: [2, 'должно содержать минимум 2 символа'],
     maxlength: [30, 'должно содержать максимум 30 символов'],
     default: 'Исследователь',
   },
   avatar: {
     type: String,
-    required: [true, 'обязательно для заполнения'],
+    // required: [true, 'обязательно для заполнения'],
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
