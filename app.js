@@ -37,9 +37,9 @@ app.post('/signin', celebrate({
   //   email: Joi.string().required().email(),
   // }),
   [Segments.BODY]: Joi.object().keys({
-    name: Joi.string(),
-    about: Joi.string(),
-    avatar: Joi.string(),
+    // name: Joi.string().min(2).max(30),
+    // about: Joi.string(),
+    // avatar: Joi.string(),
     password: Joi.string().required(),
     email: Joi.string().required(),
   }),
