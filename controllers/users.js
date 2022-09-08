@@ -7,6 +7,7 @@ const {
   ServerError,
   NotFoundError,
   CastError,
+  ConflictError,
 } = require('../constants/errors');
 
 module.exports.createUser = (req, res, next) => {
@@ -34,52 +35,65 @@ module.exports.createUser = (req, res, next) => {
           if (err.name === 'ValidationError') {
             return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
           }
+          if (err.code === 11000) {
+            next(new ConflictError(`Пользователь с email '${err.keyValue.email}' уже зарегистрирован`));
+          }
           return next(new ServerError('Произошла ошибка'));
         });
     })
-    .catch((err) => next(new ServerError('Произошла ошибка')));
+    .catch(() => {
+      next(new ServerError('Произошла ошибка'));
+    });
 };
+
+// module.exports.login = (req, res, next) => {
+//   const { email, password } = req.body;
+//   User.findOne({ email })
+//     .orFail(() => next(new UnauthorizedError('Неправильные почта или пароль')))
+//     .select('+password')
+//     .then((user) => {
+//       bcrypt.compare(password, user.password)
+//         .then((isUserValid) => {
+//           if (isUserValid) {
+//             const token = jwt.sign({
+//               _id: user._id,
+//             }, 'SECRET');
+
+//             res.cookie('jwt', token, {
+//               maxAge: 604800000,
+//               httpOnly: true,
+//               sameSite: true,
+//             });
+
+//             res.send({ data: user.toJSON() });
+//           } else {
+//             next(new UnauthorizedError('Неправильные почта или пароль'));
+//           }
+//         });
+//     })
+//     .catch(() => next(new ServerError('Произошла ошибка')));
+// };
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email })
-    .orFail(() => next(new ValidationError('Не правильный email или пароль')))
-    .select('+password')
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      bcrypt.compare(password, user.password)
-        .then((isUserValid) => {
-          if (isUserValid) {
-            const token = jwt.sign({
-              _id: user._id,
-            }, 'SECRET');
+      const token = jwt.sign({
+        _id: user._id,
+      }, 'SECRET');
 
-            res.cookie('jwt', token, {
-              maxAge: 604800000,
-              httpOnly: true,
-              sameSite: true,
-            })
+      res.cookie('jwt', token, {
+        maxAge: 604800000,
+        httpOnly: true,
+        sameSite: true,
+      });
 
-            res.send({ data: user.toJSON() });
-          } else {
-            next(new ValidationError('Не правильный email или пароль'));
-          }
-        })
+      res.send({ data: user.toJSON() });
     })
-    .catch(() => next(new ServerError('Произошла ошибка')));
+    .catch(() => {
+      next(new ServerError('Произошла ошибка'));
+    });
 };
-
-// module.exports.createUser = (req, res, next) => {
-//   User.create(req.body)
-//     .then((user) => {
-//       res.send({ data: user });
-//     })
-//     .catch((err) => {
-//       if (err.name === 'ValidationError') {
-//         return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
-//       }
-//       return next(new ServerError('Произошла ошибка'));
-//     });
-// };
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -91,6 +105,22 @@ module.exports.getUsers = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
+    .then((user) => {
+      if (user) {
+        return res.send(user);
+      }
+      return next(new NotFoundError(`Пользователь по указанному c id: ${req.params.cardId} не найден`));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new CastError('Передан некорректный id пользователя'));
+      }
+      return next(new ServerError('Произошла ошибка'));
+    });
+};
+
+module.exports.getCurrentUserInfo = (req, res, next) => {
+  User.findById(req.user)
     .then((user) => {
       if (user) {
         return res.send(user);

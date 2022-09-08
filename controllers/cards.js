@@ -33,16 +33,22 @@ module.exports.getCards = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (card) {
-        return res.send({ message: 'Карточка удалена' });
+        if (card.owner.toString() === req.user._id.toString()) {
+          Card.findByIdAndRemove(req.params.cardId)
+            .then(() => res.send({ message: 'Карточка удалена' }));
+        } else {
+          next(new CastError('Переданы некорректные данные при удалении карточки'));
+        }
+      } else {
+        next(new NotFoundError(`Карточка c id: ${req.params.cardId} не найдена`));
       }
-      return next(new NotFoundError(`Карточка c id: ${req.params.cardId} не найдена`));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new CastError('Переданы некорректные данные при создании карточки'));
+        return next(new CastError('Переданы некорректные данные при удалении карточки'));
       }
       return next(new ServerError('Произошла ошибка'));
     });

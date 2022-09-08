@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { UnauthorizedError, ServerError } = require('../constants/errors');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -19,7 +20,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: [true, 'обязательно для заполнения'],
-    default: 'hhttps://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
     type: String,
@@ -33,11 +34,38 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.methods.toJSON = function() {
+userSchema.methods.toJSON = function () {
   const user = this.toObject();
   return {
     _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
   };
 };
+
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new UnauthorizedError('Неправильные почта или пароль'));
+      }
+
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new UnauthorizedError('Неправильные почта или пароль'));
+          }
+
+          return user;
+        });
+    })
+    .catch(() => Promise.reject(new ServerError('Произошла ошибка')));
+};
+
+const avatarValidator = function (value) {
+  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/gi;
+  return regex.test(value);
+};
+
+userSchema.path('avatar').validate(avatarValidator, 'error');
 
 module.exports = mongoose.model('user', userSchema);
