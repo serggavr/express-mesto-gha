@@ -1,5 +1,8 @@
+/* eslint-disable func-names */
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
+
 const { UnauthorizedError, ServerError } = require('../constants/errors');
 
 const userSchema = new mongoose.Schema({
@@ -26,6 +29,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: [true, 'обязательно для заполнения'],
+    validate(value) {
+      if (!validator.isEmail(value)) {
+        throw new Error('Не верный формат email');
+      }
+    },
   },
   password: {
     type: String,

@@ -8,6 +8,7 @@ const {
   NotFoundError,
   CastError,
   ConflictError,
+  UnauthorizedError,
 } = require('../constants/errors');
 
 module.exports.createUser = (req, res, next) => {
@@ -46,34 +47,6 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-// module.exports.login = (req, res, next) => {
-//   const { email, password } = req.body;
-//   User.findOne({ email })
-//     .orFail(() => next(new UnauthorizedError('Неправильные почта или пароль')))
-//     .select('+password')
-//     .then((user) => {
-//       bcrypt.compare(password, user.password)
-//         .then((isUserValid) => {
-//           if (isUserValid) {
-//             const token = jwt.sign({
-//               _id: user._id,
-//             }, 'SECRET');
-
-//             res.cookie('jwt', token, {
-//               maxAge: 604800000,
-//               httpOnly: true,
-//               sameSite: true,
-//             });
-
-//             res.send({ data: user.toJSON() });
-//           } else {
-//             next(new UnauthorizedError('Неправильные почта или пароль'));
-//           }
-//         });
-//     })
-//     .catch(() => next(new ServerError('Произошла ошибка')));
-// };
-
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
@@ -91,7 +64,7 @@ module.exports.login = (req, res, next) => {
       res.send({ data: user.toJSON() });
     })
     .catch(() => {
-      next(new ServerError('Произошла ошибка'));
+      next(new UnauthorizedError('Неправильные почта или пароль'));
     });
 };
 

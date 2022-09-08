@@ -4,6 +4,7 @@ const {
   ServerError,
   NotFoundError,
   CastError,
+  UnauthorizedError,
 } = require('../constants/errors');
 
 module.exports.createCard = (req, res, next) => {
@@ -40,7 +41,7 @@ module.exports.deleteCard = (req, res, next) => {
           Card.findByIdAndRemove(req.params.cardId)
             .then(() => res.send({ message: 'Карточка удалена' }));
         } else {
-          next(new CastError('Переданы некорректные данные при удалении карточки'));
+          next(new UnauthorizedError('Переданы некорректные данные при удалении карточки'));
         }
       } else {
         next(new NotFoundError(`Карточка c id: ${req.params.cardId} не найдена`));

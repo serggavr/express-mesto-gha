@@ -28,4 +28,12 @@ const cardSchema = new mongoose.Schema({
   },
 });
 
+// eslint-disable-next-line func-names
+const linkValidator = function (value) {
+  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/gi;
+  return regex.test(value);
+};
+
+cardSchema.path('link').validate(linkValidator, 'error');
+
 module.exports = mongoose.model('card', cardSchema);
