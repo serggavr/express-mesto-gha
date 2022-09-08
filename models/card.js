@@ -30,7 +30,7 @@ const cardSchema = new mongoose.Schema({
 
 // eslint-disable-next-line func-names
 const linkValidator = function (value) {
-  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/gi;
+  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i;
   return regex.test(value);
 };
 

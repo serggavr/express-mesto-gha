@@ -70,7 +70,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
 };
 
 const avatarValidator = function (value) {
-  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/gi;
+  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i;
   return regex.test(value);
 };
 
