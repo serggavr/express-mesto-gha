@@ -13,6 +13,7 @@ const { auth } = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { NotFoundError } = require('./constants/errors');
+const { linkValidationPattern } = require('./constants/linkValidationPattern');
 
 const {
   PORT = 3000,
@@ -32,17 +33,10 @@ app.post('/signup', celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i),
+    avatar: Joi.string().regex(linkValidationPattern),
     password: Joi.string().required(),
     email: Joi.string().required().email(),
   }),
-  // [Segments.BODY]: Joi.object().keys({
-  //   name: Joi.string().min(2).max(30),
-  //   about: Joi.string(),
-  //   avatar: Joi.string(),
-  //   password: Joi.string().required(),
-  //   email: Joi.string().required(),
-  // }),
 }), createUser);
 
 app.post('/signin', celebrate({
@@ -50,10 +44,6 @@ app.post('/signin', celebrate({
     password: Joi.string().required(),
     email: Joi.string().required().email(),
   }),
-  // [Segments.BODY]: Joi.object().keys({
-  //   password: Joi.string().required(),
-  //   email: Joi.string().required(),
-  // }),
 }), login);
 
 app.use(auth);

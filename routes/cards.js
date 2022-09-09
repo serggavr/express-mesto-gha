@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi, Segments } = require('celebrate');
 
+const { linkValidationPattern } = require('../constants/linkValidationPattern');
 const {
   createCard, getCards, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
@@ -27,7 +28,7 @@ router.delete('/:cardId/likes', celebrate({
 router.post('/', celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().regex(/^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i),
+    link: Joi.string().required().regex(linkValidationPattern),
   }),
 }), createCard);
 

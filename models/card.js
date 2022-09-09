@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { linkValidationPattern } = require('../constants/linkValidationPattern');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -30,8 +31,7 @@ const cardSchema = new mongoose.Schema({
 
 // eslint-disable-next-line func-names
 const linkValidator = function (value) {
-  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i;
-  return regex.test(value);
+  return linkValidationPattern.test(value);
 };
 
 cardSchema.path('link').validate(linkValidator, 'error');

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
 const { UnauthorizedError, ServerError } = require('../constants/errors');
+const { linkValidationPattern } = require('../constants/linkValidationPattern');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -70,8 +71,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
 };
 
 const avatarValidator = function (value) {
-  const regex = /^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i;
-  return regex.test(value);
+  return linkValidationPattern.test(value);
 };
 
 userSchema.path('avatar').validate(avatarValidator, 'error');
