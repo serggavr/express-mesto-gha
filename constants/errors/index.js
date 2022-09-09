@@ -1,4 +1,3 @@
-const ValidationError = require('./ValidationError');
 const ServerError = require('./ServerError');
 const NotFoundError = require('./NotFoundError');
 const CastError = require('./CastError');
@@ -7,7 +6,6 @@ const ConflictError = require('./ConflictError');
 const ForbiddenError = require('./ForbiddenError');
 
 module.exports = {
-  ValidationError,
   ServerError,
   NotFoundError,
   CastError,
