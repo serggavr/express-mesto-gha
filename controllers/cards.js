@@ -1,6 +1,5 @@
 const Card = require('../models/card');
 const {
-  ValidationError,
   ServerError,
   NotFoundError,
   CastError,
@@ -19,7 +18,7 @@ module.exports.createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('card validation failed:', '').replace(':', '')}`));
+        return next(new CastError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('card validation failed:', '').replace(':', '')}`));
       }
       return next(new ServerError('Произошла ошибка'));
     });

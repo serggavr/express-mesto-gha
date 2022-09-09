@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const {
-  ValidationError,
   ServerError,
   NotFoundError,
   CastError,
@@ -35,7 +34,7 @@ module.exports.createUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            return next(new ValidationError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
+            return next(new CastError(`Переданы некорректные данные при создании пользователя. Поле${err.message.replace('user validation failed:', '').replace(':', '')}`));
           }
           if (err.code === 11000) {
             return next(new ConflictError(`Пользователь с email '${err.keyValue.email}' уже зарегистрирован`));
@@ -129,7 +128,7 @@ module.exports.editUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            return next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
+            return next(new CastError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
           }
         });
     })
@@ -159,7 +158,7 @@ module.exports.editUserAvatar = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            return next(new ValidationError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
+            return next(new CastError(`Переданы некорректные данные при обновлении профиля. Поле${err.message.replace('Validation failed:', '').replace(':', '')}`));
           }
         });
     })
