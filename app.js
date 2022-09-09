@@ -13,7 +13,7 @@ const { auth } = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { NotFoundError } = require('./constants/errors');
-const { linkValidationPattern } = require('./constants/linkValidationPattern');
+const { linkValidationPattern } = require('./constants/validationPattern');
 
 const {
   PORT = 3000,

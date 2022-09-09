@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi, Segments } = require('celebrate');
 
-const { linkValidationPattern } = require('../constants/linkValidationPattern');
+const { linkValidationPattern, idValidationPattern } = require('../constants/validationPattern');
 const {
   getUsers, getUser, editUser, editUserAvatar, getCurrentUserInfo,
 } = require('../controllers/users');
@@ -18,7 +18,7 @@ router.patch('/me', celebrate({
 
 router.get('/:id', celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    id: Joi.string().alphanum().length(24),
+    id: Joi.string().regex(idValidationPattern),
   }),
 }), getUser);
 

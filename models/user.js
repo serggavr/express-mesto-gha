@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
 const { UnauthorizedError, ServerError } = require('../constants/errors');
-const { linkValidationPattern } = require('../constants/linkValidationPattern');
+const { linkValidationPattern } = require('../constants/validationPattern');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -67,7 +67,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
           return user;
         });
     })
-    .catch(() => Promise.reject(new ServerError('Произошла ошибка')));
+    .catch((err) => {
+      if (err.statusCode === 401) {
+        return Promise.reject(new UnauthorizedError(err.message));
+      }
+      return Promise.reject(new ServerError('Произошла ошибка'));
+    });
 };
 
 const avatarValidator = function (value) {

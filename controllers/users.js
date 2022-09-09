@@ -8,7 +8,6 @@ const {
   NotFoundError,
   CastError,
   ConflictError,
-  UnauthorizedError,
 } = require('../constants/errors');
 
 module.exports.createUser = (req, res, next) => {
@@ -63,8 +62,8 @@ module.exports.login = (req, res, next) => {
 
       res.send({ data: user.toJSON() });
     })
-    .catch(() => {
-      next(new UnauthorizedError('Неправильные почта или пароль'));
+    .catch((err) => {
+      next(err);
     });
 };
 

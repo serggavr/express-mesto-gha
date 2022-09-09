@@ -51,7 +51,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new CastError('Переданы некорректные данные при удалении карточки'));
       }
-      return next(new ServerError('Произошла ошибка'));
+      return next(new ServerError('Произошла ошибка')); // обработка ошибки
     });
 };
 
