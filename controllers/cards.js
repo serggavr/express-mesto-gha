@@ -4,7 +4,7 @@ const {
   ServerError,
   NotFoundError,
   CastError,
-  UnauthorizedError,
+  ForbiddenError,
 } = require('../constants/errors');
 
 module.exports.createCard = (req, res, next) => {
@@ -35,16 +35,17 @@ module.exports.getCards = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (card) {
         if (card.owner.toString() === req.user._id.toString()) {
           Card.findByIdAndRemove(req.params.cardId)
             .then(() => res.send({ message: 'Карточка удалена' }));
         } else {
-          next(new UnauthorizedError('Переданы некорректные данные при удалении карточки'));
+          return next(new ForbiddenError('Доступ запрещен'));
         }
       } else {
-        next(new NotFoundError(`Карточка c id: ${req.params.cardId} не найдена`));
+        return next(new NotFoundError(`Карточка c id: ${req.params.cardId} не найдена`));
       }
     })
     .catch((err) => {

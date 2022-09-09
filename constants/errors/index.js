@@ -4,6 +4,7 @@ const NotFoundError = require('./NotFoundError');
 const CastError = require('./CastError');
 const UnauthorizedError = require('./UnauthorizedError');
 const ConflictError = require('./ConflictError');
+const ForbiddenError = require('./ForbiddenError');
 
 module.exports = {
   ValidationError,
@@ -12,4 +13,5 @@ module.exports = {
   CastError,
   UnauthorizedError,
   ConflictError,
+  ForbiddenError,
 };

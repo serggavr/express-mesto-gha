@@ -6,13 +6,28 @@ const {
 } = require('../controllers/cards');
 
 router.get('/', getCards);
-router.delete('/:cardId', deleteCard);
-router.put('/:cardId/likes', likeCard);
-router.delete('/:cardId/likes', dislikeCard);
+
+router.delete('/:cardId', celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    cardId: Joi.string().alphanum().length(24),
+  }),
+}), deleteCard);
+
+router.put('/:cardId/likes', celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    cardId: Joi.string().alphanum().length(24),
+  }),
+}), likeCard);
+
+router.delete('/:cardId/likes', celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    cardId: Joi.string().alphanum().length(24),
+  }),
+}), dislikeCard);
 router.post('/', celebrate({
   [Segments.BODY]: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().regex(/^https*:\/\/(www.)*[0-9a-zа-я.\-_~:/?[\]@!$&'()*+,;=]{1,}(#*$)/i),
   }),
 }), createCard);
 
